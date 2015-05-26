@@ -65,9 +65,9 @@ with open('test_hourly.csv', 'rb') as f:
 
 
                             if (count - alldates[-1]) != 1:
-                                print('append: ' + str(alldates[-1]+1))
+                                # print('append: ' + str(alldates[-1]+1))
                                 stuff.append((alldates[-1]+1))
-                                print(stuff)
+                                # print(stuff)
                             else:
                                 stuff[-1] = count+1
 
@@ -78,15 +78,30 @@ with open('test_hourly.csv', 'rb') as f:
                     newDict[sta_name][col_name] =d
                     newDict[sta_name]['count'] =stuff
                 # v = []
-                # elif col_name == "value":
-                #     for j, tm in enumerate(col_vals):
-                #         print(tm)
+                elif col_name == "value":
+                    # for j, val in enumerate(col_vals):
+                    #     # print(val)
+                    #     # print(newDict[sta_name]['count'])
+                    build = 0
+                    for ind, v in enumerate(newDict[sta_name]['count']):
+                        print('value: ')
+                        print(v)
+                        avg = col_vals[build:v+build]
+                        print(avg)
+                        numlist = [float(x) for x in avg]
+                        print(sum(numlist)/len(numlist))
+                        newDict[sta_name]['O3_Avg'] = sum(numlist)/len(numlist)
+                        newDict[sta_name]['O3_Max'] = max(numlist)
+                        newDict[sta_name]['O3_Min'] = min(numlist)
+                        build+=v
+
+
                 # print('all the dates: ')
                 # print(len(alldates))
 
 
                     #
-                print(newDict)
+            print(newDict)
 
                 # print(sum(float(col_vals)))
                 # for val in col_vals:
