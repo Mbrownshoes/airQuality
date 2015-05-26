@@ -7,51 +7,122 @@ with open('test_hourly.csv', 'rb') as f:
     fields = reader.next()
     print(fields)
 
-    dicte = {}
+    subset = {}
     # row = [1,5,5]
 
     for row in reader:
         for i, val in enumerate(row):
             if i == 1:
                 StaName = val
-                print(StaName)
+                # print(StaName)
                 continue
 
-            if StaName not in dicte:
-                dicte[StaName] = {}
+            if StaName not in subset:
+                subset[StaName] = {}
+
             column_name = fields[i]
-            if column_name not in dicte[StaName]:
-                dicte[StaName][column_name] = []
+
+            #set up dict keys
+            if column_name not in subset[StaName]:
+                subset[StaName][column_name] = []
 
             #store the data
-            dicte[StaName][column_name].append(val)
-    # print(dicte)
 
-    for sta_name, sta_data in dicte.iteritems():
-         for column_name, column_values in sta_data.iteritems():
-            # total = sum(column_values)
-            # with open('newData.csv', "w") as output:
-            #     writer = csv.writer(output, lineterminator='\n')
-            #     writer.writerow(fields) # header
+            subset[StaName][column_name].append(val)
+    # print(subset)
 
+    newDict = {}
+    # print(subset)
+    # with open('newData.csv', "w") as output:
+    #     writer = csv.writer(output, lineterminator='\n')
+    #     writer.writerow(fields) # header
+    #     # print(subset)
+    for sta_name, sta_data in subset.iteritems():
+        print(sta_name)
+        if sta_name not in newDict:
+            newDict[sta_name] = {}
+            for col_name, col_vals in sta_data.iteritems():
+
+
+                d = []
+
+                if col_name == 'date_time':
+                    alldates = [0]
+                    stuff=[0]
+                    count = 0
+                    for j, tm in enumerate(col_vals):
+
+                        # find unique dates for each station
+                        if str(datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()) not in d:
+                            d.append(str(datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()))
+                            # if count > 0:
+                            #     alldates.append(count)
+
+                            count = 0
+                            # alldates.append(count)
+                        else:
+                            count += 1
+
+
+                            if (count - alldates[-1]) != 1:
+                                print('append: ' + str(alldates[-1]+1))
+                                stuff.append((alldates[-1]+1))
+                                print(stuff)
+                            else:
+                                stuff[-1] = count+1
+
+                            alldates.append(count)
+
+
+                    # add unique dates list
+                    newDict[sta_name][col_name] =d
+                    newDict[sta_name]['count'] =stuff
+                # v = []
+                # elif col_name == "value":
+                #     for j, tm in enumerate(col_vals):
+                #         print(tm)
+                # print('all the dates: ')
+                # print(len(alldates))
+
+
+                    #
+                print(newDict)
+
+                # print(sum(float(col_vals)))
+                # for val in col_vals:
+                #     print(val)
+
+    # print(newDict)
+                # break;
+    #         for col_name, col_vals in sta_data.iteritems():
+    #             try:
+    #                 print(col_name)
+    #                 total = sum(column_values)
+    #                 # print(total)
+    #             except TypeError:
+    #                 pass
+
+
+
+            # print(sta_data)
                 #get total number of days
-            counter = 0
-            if column_name == 'date_time':
-                for j, tm in enumerate(column_values):
-                    if j == 0:
-                        d = datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()
-                        writer.writerow([str(d),])
-
-                    d1 = datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()
-                    if d1 == d:
-                        counter += 1
-
-                    else: # new day, write average value for previous day for all columns.
-
-                        # writer.writerow([column_values[:counter]])
-                    # print('days '+str(count))
-            print(column_name)
-            print(counter)
+            # counter = 0
+            # if column_name == 'date_time':
+            #     for j, tm in enumerate(column_values):
+            #         if j == 0:
+            #             d = datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()
+            #             writer.writerow([str(d),])
+            #
+            #         d1 = datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()
+            #         if d1 == d:
+            #             counter += 1
+            #
+            #         else: # new day, write average value for previous day for all columns.
+            #
+            #             # writer.writerow([column_values[:counter]])
+            #         # print('days '+str(count))
+            # print(column_name)
+            # print(counter)
             # for column_name, column_values in sorted(sta_data):
         #     total = sum(column_values)
 
