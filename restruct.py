@@ -6,7 +6,7 @@ import csv
 import json
 from datetime import datetime
 
-with open('O3_hourly.csv', 'rb') as f:
+with open('build/O3_hourly.csv', 'rb') as f:
     reader = csv.reader(f)
     fields = reader.next()
 
