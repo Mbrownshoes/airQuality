@@ -13,5 +13,64 @@ path {
 <body>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<!-- Latest compiled and minified CSS -->
+<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+ -->
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+<link rel="stylesheet" href="main.css"> 
+
+ <h1>British Columbia Air Quality Explorer</h1>
+
+ <!-- <p>Click on the map to see monthly values for that location</p>    -->
+<select id="station">
+</select>
+
+
 <script>
+var alldat
+$(document).ready(function() {
+    $.getJSON("subset.json", function(data) {
+        console.log(data)
+        var items = [];
+        $.each(data, function(key, value){
+        	items.push(value)
+        	console.log(value)
+                var option = $('<option />').text(key);
+                // console.log(option)
+                alldat = data
+                $("#station").append(option);
+            });
+        	console.log(items)
+
+    });
+
+});
+
+$(document).ready(function() {
+    $('#station').on('change', function() {
+        station = $('#station').val();
+        console.log(alldat[station])
+
+        // map.removeLayer(wmsL); // remove layer to prevent them from piling up.
+        // drawMap(current.month, climate_var, day);
+
+    });
+});
+
+
+
+
+
+
+
+
+
+
+</script>
 
