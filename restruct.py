@@ -1,14 +1,17 @@
-# O3_hourly.csv and create daily average
+# loads data from O3_hourly.csv and create daily average max and min values for
+# each day and all stations. Saves as json file.
+
+
 import csv
 import json
 from datetime import datetime
 
-with open('test_hourly.csv', 'rb') as f:
+with open('O3_hourly.csv', 'rb') as f:
     reader = csv.reader(f)
     fields = reader.next()
 
     subset = {} # put data in a dict
-
+    StaName = ""
     for row in reader:
         for i, val in enumerate(row):
             if i == 1:
@@ -32,6 +35,7 @@ with open('test_hourly.csv', 'rb') as f:
 
     for sta_name, sta_data in subset.iteritems():
         if sta_name not in newDict:
+            print(sta_name)
             newDict[sta_name] = {}
             for col_name, col_vals in sta_data.iteritems():
 
@@ -42,45 +46,54 @@ with open('test_hourly.csv', 'rb') as f:
                     dayMeas=[0]
                     count = 0 # find number of measurements each day
                     for j, tm in enumerate(col_vals):
+                        if datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date() > datetime.strptime('2010-01-1',"%Y-%m-%d").date():
                         # find unique dates for each station
-                        if str(datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()) not in d:
-                            d.append(str(datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()))
+                            if str(datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()) not in d:
+                                d.append(str(datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()))
 
-                            count = 0 # restart at 0 with each new day
-                        else:
-                            count += 1
-
-                            if (count - alldates[-1]) != 1:
-                                dayMeas.append((alldates[-1]+1))
+                                count = 0 # restart at 0 with each new day
                             else:
-                                dayMeas[-1] = count+1
+                                count += 1
 
-                            alldates.append(count)
+                                if (count - alldates[-1]) != 1:
+                                    dayMeas.append((alldates[-1]+1))
+                                else:
+                                    dayMeas[-1] = count+1
 
-                    # add unique dates list
+                                alldates.append(count)
+
+                        # add unique dates list
                     newDict[sta_name][col_name] =d
-                    newDict[sta_name]['count'] =dayMeas
+                    # newDict[sta_name]['count'] =dayMeas
                 # v = []
                 elif col_name == "value":
                     build = 0
                     avg=[]
                     mx=[]
                     mn=[]
-                    for ind, v in enumerate(newDict[sta_name]['count']):
-                        print(ind)
+                    # for ind, v in enumerate(newDict[sta_name]['count']):
+                    for ind, v in enumerate(dayMeas):
+                        # print(v)
                         m = col_vals[build:v+build]
                         numlist = [float(x) for x in m]
-                        print('num list: ' + str(numlist))
+                        # print('num list: ' + str(numlist))
 
                         # save avg, max and min vals to dict
-                        avg.append(round(sum(numlist)/len(numlist),2))
-                        mn.append(min(numlist))
-                        mx.append(max(numlist))
+                        try:
+                            avg.append(round(sum(numlist)/len(numlist),2))
+                            mn.append(min(numlist))
+                            mx.append(max(numlist))
+                        except:
+                            print(m)
+                            print(build)
+                            # print(col_vals)
+                            print(v)
+                            break
 
                         build+=v
                     newDict[sta_name]['O3_Avg'] = avg
                     newDict[sta_name]['O3_Max'] = mx
                     newDict[sta_name]['O3_Min'] = mn
-    print(newDict)
+    # print(newDict)
 
     json.dump(newDict, open('subset.json', 'wb'))
