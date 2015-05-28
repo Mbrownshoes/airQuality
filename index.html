@@ -2,11 +2,46 @@
 <meta charset="utf-8">
 <style>
 
-path {
+body {
+  font: 12px "Helvetica Neue", Helvetica;
+}
+svg {
+    position: relative;
+    width: 760px;
+    height: 500px;
+}
+
+#chart {
+  font: 12px "Helvetica Neue", Helvetica;
+  
+}
+#chart_container {
+    position: absolute;
+
+ 
+}
+
+.axis path,
+.axis line {
   fill: none;
   stroke: #000;
-  stroke-linejoin: round;
-  stroke-linecap: round;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.MMline {
+  fill: none;
+  stroke: #aaa;
+  stroke-width: 1.5px;
 }
 
 </style>
@@ -19,57 +54,181 @@ path {
  -->
 <!-- Optional theme -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
-
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-
 <link rel="stylesheet" href="main.css"> 
 
- <h1>British Columbia Air Quality Explorer</h1>
+ <h1>BC Air Quality Explorer</h1>
 
  <!-- <p>Click on the map to see monthly values for that location</p>    -->
 <select id="station">
 </select>
 
+<div id="chart_container">
+    <div id="chart"></div>
+</div>
 
 <script>
+var test
+
+var parseDate = d3.time.format("%Y-%m-%d").parse;
 var alldat
+
 $(document).ready(function() {
     $.getJSON("subset.json", function(data) {
-        console.log(data)
         var items = [];
+        alldat = data
         $.each(data, function(key, value){
         	items.push(value)
-        	console.log(value)
                 var option = $('<option />').text(key);
                 // console.log(option)
-                alldat = data
+                
                 $("#station").append(option);
             });
-        	console.log(items)
+        // plot default selected
+        dat = alldat['Whistler Function Junction MAML']
+
+        var chartData = []
+        for (i = 0; i < dat.date_time.length; i++) {
+                chartData.push({
+                	date: parseDate(dat.date_time[i]),
+                	avg: dat.O3_Avg[i],
+                	min: dat.O3_Min[i],
+                	max: dat.O3_Max[i],
+                })
+            }
+
+		makechart(chartData)
 
     });
-
+    
 });
+
 
 $(document).ready(function() {
-    $('#station').on('change', function() {
+    $('#station').on('change', function(data) {
         station = $('#station').val();
-        console.log(alldat[station])
+        
 
-        // map.removeLayer(wmsL); // remove layer to prevent them from piling up.
-        // drawMap(current.month, climate_var, day);
+        dat = alldat[station]
+        chartData = []
+        for (i = 0; i < dat.date_time.length; i++) {
+                chartData.push({
+                	date: parseDate(dat.date_time[i]),
+                	avg: dat.O3_Avg[i],
+                	min: dat.O3_Min[i],
+                	max: dat.O3_Max[i],
+                })
+            }
+
+        updatechart(chartData)
 
     });
 });
 
+// Setup graph
+
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
 
 
+var x = d3.time.scale()
+    .range([0, width]);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+
+var line = d3.svg.line()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.avg); });
+
+var Maxline = d3.svg.line()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.max); });
+
+var Minline = d3.svg.line()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.min); });
 
 
+var svg = d3.select("#chart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
+function makechart(data){
+	x.domain(d3.extent(data, function(d) { return d.date; }));
+	y.domain([0, d3.max(data, function(d) { return d.max; })]);
+	// y.domain(d3.extent(data, function(d) { return d.max; }));
 
+	svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis);
+
+	svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+		.append("text")
+		.attr("transform", "rotate(-90)")
+		.attr("y", 6)
+		.attr("dy", ".71em")
+		.style("text-anchor", "end")
+		.text("O3 (ppb)");
+
+	svg.append("path")
+		.attr("class", "line")
+		.attr("d", line(data));
+
+	// svg.append("path")
+	// 		.datum(data)
+	// 		.attr("class", "MMline")
+	// 		.attr("d", Maxline);
+
+	// svg.append("path")
+	// 	.datum(data)
+	// 	.attr("class", "MMline")
+	// 	.attr("d", Minline);
+
+}
+
+
+function updatechart(data){
+
+	console.log(data)
+
+	x.domain(d3.extent(data, function(d) { return d.date; }));
+	y.domain([0, d3.max(data, function(d) { return d.max; })]);
+
+	svg.select(".line")
+	    .transition()
+	    .duration(1000)
+	    .attr("d", line(data));
+
+     //Update X axis
+	    svg.select(".x.axis")
+		    .transition()
+	        .duration(1000)
+	        .call(xAxis);
+
+	    //y-axis transition
+	    svg.select(".y.axis")
+	        .transition()
+	        .duration(1000)
+	        .call(yAxis);
+
+}
 
 
 </script>

@@ -11,9 +11,11 @@ with open('build/O3_hourly.csv', 'rb') as f:
     fields = reader.next()
 
     subset = {} # put data in a dict
-    StaName = ""
+    # StaName = ""
     for row in reader:
         for i, val in enumerate(row):
+            if i == 0:
+                i = 1
             if i == 1:
                 StaName = val
                 continue
@@ -33,7 +35,7 @@ with open('build/O3_hourly.csv', 'rb') as f:
     # new dict to store mean, min and max values
     newDict = {}
 
-    for sta_name, sta_data in subset.iteritems():
+    for sta_name, sta_data in sorted(subset.iteritems()):
         if sta_name not in newDict:
             print(sta_name)
             newDict[sta_name] = {}
