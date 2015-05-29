@@ -48,7 +48,7 @@ with open('build/O3_hourly.csv', 'rb') as f:
                     dayMeas=[0]
                     count = 0 # find number of measurements each day
                     for j, tm in enumerate(col_vals):
-                        if datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date() > datetime.strptime('2010-01-1',"%Y-%m-%d").date():
+                        if datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date() > datetime.strptime('2005-01-1',"%Y-%m-%d").date():
                         # find unique dates for each station
                             if str(datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()) not in d:
                                 d.append(str(datetime.strptime(tm, "%Y-%m-%d %H:%M:%S").date()))
@@ -77,6 +77,8 @@ with open('build/O3_hourly.csv', 'rb') as f:
                     for ind, v in enumerate(dayMeas):
                         # print(v)
                         m = col_vals[build:v+build]
+
+                        m = [-999 if x == 'NA' else x for x in m]
                         numlist = [float(x) for x in m]
                         # print('num list: ' + str(numlist))
 
@@ -95,7 +97,7 @@ with open('build/O3_hourly.csv', 'rb') as f:
                         build+=v
                     newDict[sta_name]['O3_Avg'] = avg
                     newDict[sta_name]['O3_Max'] = mx
-                    newDict[sta_name]['O3_Min'] = mn
+                    # newDict[sta_name]['O3_Min'] = mn
     # print(newDict)
 
     json.dump(newDict, open('subset.json', 'wb'))

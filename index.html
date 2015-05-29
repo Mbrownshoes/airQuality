@@ -59,7 +59,7 @@ svg {
 <link rel="stylesheet" href="main.css"> 
 
  <h1>BC Air Quality Explorer</h1>
-
+<h2>Ground level Ozone</h2>
  <!-- <p>Click on the map to see monthly values for that location</p>    -->
 <select id="station">
 </select>
@@ -73,6 +73,8 @@ var test
 
 var parseDate = d3.time.format("%Y-%m-%d").parse;
 var alldat
+
+
 
 $(document).ready(function() {
     $.getJSON("subset.json", function(data) {
@@ -93,7 +95,7 @@ $(document).ready(function() {
                 chartData.push({
                 	date: parseDate(dat.date_time[i]),
                 	avg: dat.O3_Avg[i],
-                	min: dat.O3_Min[i],
+                	// min: dat.O3_Min[i],
                 	max: dat.O3_Max[i],
                 })
             }
@@ -116,7 +118,7 @@ $(document).ready(function() {
                 chartData.push({
                 	date: parseDate(dat.date_time[i]),
                 	avg: dat.O3_Avg[i],
-                	min: dat.O3_Min[i],
+                	// min: dat.O3_Min[i],
                 	max: dat.O3_Max[i],
                 })
             }
@@ -159,6 +161,11 @@ var Minline = d3.svg.line()
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.min); });
 
+// var zoom = d3.behavior.zoom()
+//     .x(x)
+//     .y(y)
+//     .scaleExtent([1, 10])
+//     .on("zoom", zoomed);	
 
 var svg = d3.select("#chart").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -169,7 +176,7 @@ var svg = d3.select("#chart").append("svg")
 
 function makechart(data){
 	x.domain(d3.extent(data, function(d) { return d.date; }));
-	y.domain([0, d3.max(data, function(d) { return d.max; })]);
+	y.domain([-10, d3.max(data, function(d) { return d.max; })]);
 	// y.domain(d3.extent(data, function(d) { return d.max; }));
 
 	svg.append("g")
@@ -209,7 +216,7 @@ function updatechart(data){
 	console.log(data)
 
 	x.domain(d3.extent(data, function(d) { return d.date; }));
-	y.domain([0, d3.max(data, function(d) { return d.max; })]);
+	y.domain([-10, d3.max(data, function(d) { return d.max; })]);
 
 	svg.select(".line")
 	    .transition()
@@ -223,10 +230,10 @@ function updatechart(data){
 	        .call(xAxis);
 
 	    //y-axis transition
-	    svg.select(".y.axis")
-	        .transition()
-	        .duration(1000)
-	        .call(yAxis);
+	    // svg.select(".y.axis")
+	    //     .transition()
+	    //     .duration(1000)
+	    //     .call(yAxis);
 
 }
 
